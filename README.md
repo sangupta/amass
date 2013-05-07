@@ -1,5 +1,5 @@
 amass
-=====
+-----
 
 `amass` is a high-throughput enterprise-grade web-crawler that crawls specific URLs. It can be used to fetch 
 millions of url's per hour. `amass` is different than other crawlers like `crawler4j` that it does not crawl
@@ -41,7 +41,7 @@ For more information on SemVer, please visit http://semver.org/.
 License
 -------
 	
-Copyright (c) 2011, Sandeep Gupta
+Copyright (c) 2011-2013, Sandeep Gupta
 
 The project uses various other libraries that are subject to their
 own license terms. See the distribution libraries or the project
