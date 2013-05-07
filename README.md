@@ -1,7 +1,24 @@
 amass
 =====
 
-`amass` is a high-throughput enterprise-grade web-crawler that crawls specific URLs. It can be used to fetch millions of url's per hour.
+`amass` is a high-throughput enterprise-grade web-crawler that crawls specific URLs. It can be used to fetch 
+millions of url's per hour. `amass` is different than other crawlers like `crawler4j` that it does not crawl
+the nested pages. Instead it just gathers and collects various URLs as supplied. Thus, it **amasses** specific
+data from the internet, and hence the name `amass`.
+
+Tech Stack
+----------
+
+* Oracle JDK 6.0
+* Apache Maven 3
+
+Dependencies
+------------
+`amass` project is dependent on the following libraries:
+
+* `jerry` - a utility framework library
+* `slf4j` - for logging purposes
+* `junit` - for unit-testing the code
 
 Versioning
 ----------
