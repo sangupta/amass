@@ -45,9 +45,10 @@ public interface AfterCrawlHandler {
 	 * @param response
 	 *            the {@link WebResponse} received as part of crawling.
 	 * 
+	 * @param timeConsumed
+	 *            the time consumed in milli-seconds to crawl
 	 */
-	public void afterCrawl(CrawlableURL crawlableURL, int priority,
-			WebResponse response);
+	public void afterCrawl(CrawlableURL crawlableURL, int priority, WebResponse response, long timeConsumed);
 
 	/**
 	 * Method called when crawling the URL resulted in an error being
@@ -62,7 +63,10 @@ public interface AfterCrawlHandler {
 	 * 
 	 * @param t
 	 *            the exception that was thrown during the process
+	 * 
+	 * @param timeConsumed
+	 *            the time consumed in milli-seconds to crawl
 	 */
-	public void crawlError(CrawlableURL crawlableURL, int priority, Throwable t);
+	public void crawlError(CrawlableURL crawlableURL, int priority, Throwable t, long timeConsumed);
 
 }

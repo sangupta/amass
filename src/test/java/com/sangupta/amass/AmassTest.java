@@ -42,12 +42,12 @@ public class AmassTest implements BeforeCrawlHandler, AfterCrawlHandler {
 	}
 
 	@Override
-	public void afterCrawl(CrawlableURL crawlableURL, int priority, WebResponse response) {
+	public void afterCrawl(CrawlableURL crawlableURL, int priority, WebResponse response, long time) {
 		System.out.println("Done crawling: " + crawlableURL.getURL());
 	}
 
 	@Override
-	public void crawlError(CrawlableURL crawlableURL, int priority, Throwable t) {
+	public void crawlError(CrawlableURL crawlableURL, int priority, Throwable t, long time) {
 		System.out.println("Error crawling: " + crawlableURL.getURL());
 	}
 

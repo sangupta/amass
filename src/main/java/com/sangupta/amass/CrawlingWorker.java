@@ -107,10 +107,17 @@ public class CrawlingWorker implements Runnable {
 				continue;
 			}
 			
+			LOGGER.debug("Crawling URL: " + job.getCrawlableURL().getURL() + "... ");
+			
 			WebResponse response = null;
+			long timeConsumed = 0;
+			final long start = System.currentTimeMillis();
 			try {
-				LOGGER.debug("Crawling URL: " + job.getCrawlableURL().getURL() + "... ");
+				
 				response = WebInvoker.getResponse(job.getCrawlableURL().getURL());
+				final long end = System.currentTimeMillis();
+				
+				timeConsumed = System.currentTimeMillis() - start;
 				
 				// check for stop/pause
 				if(this.amassSignal.isStopping()) {
@@ -119,14 +126,18 @@ public class CrawlingWorker implements Runnable {
 				pauseIfNeeded();
 				
 				try {
-					this.afterCrawlHandler.afterCrawl(job.getCrawlableURL(), job.getPriority().get(), response);
+					this.afterCrawlHandler.afterCrawl(job.getCrawlableURL(), job.getPriority().get(), response, timeConsumed);
 				} catch(Throwable t) {
 					LOGGER.error("Unable to execute after-crawl handler on url {}", job, t);
 				}
 			} catch(Throwable t) {
+				if(timeConsumed == 0) {
+					timeConsumed = System.currentTimeMillis() - start;
+				}
+				
 				// in case we get an error we must stop crawling now.
 				try {
-					this.afterCrawlHandler.crawlError(job.getCrawlableURL(), job.getPriority().get(), t);
+					this.afterCrawlHandler.crawlError(job.getCrawlableURL(), job.getPriority().get(), t, timeConsumed);
 				} catch(Throwable t1) {
 					LOGGER.error("Unable to execute after-crawl-error handler on url {}", job, t1);
 				}

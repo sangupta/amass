@@ -241,6 +241,15 @@ public class Amass {
 		this.crawlingQueue.submitURL(crawlableURL, priority);
 	}
 	
+	/**
+	 * Indicates if this {@link Amass} instance has pending work left or not.
+	 *  
+	 * @return
+	 */
+	public boolean hasPendingWork() {
+		return false;
+	}
+
 	// Internal methods follow
 	
 	/**
@@ -312,9 +321,12 @@ public class Amass {
 	}
 	
 	/**
-	 * Method that checks for closure of all worker crawling threads. The method waits
-	 * till all running worker threads do not indicate that they are done.
+	 * Method that checks for closure of all worker crawling threads. The method
+	 * waits till all running worker threads do not indicate that they are done.
 	 * 
+	 * @param interruptThreads
+	 *            Indicates if the threads need to be interrupted. This means
+	 *            that this is a forced shutdown of the crawling instance.
 	 */
 	protected void waitForClosureOfCrawlingThreads(final boolean interruptThreads) {
 		for(int index = 0; index < this.numThreads; index++) {
