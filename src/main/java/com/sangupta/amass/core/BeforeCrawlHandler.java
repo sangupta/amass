@@ -19,7 +19,9 @@
  * 
  */
 
-package com.sangupta.amass;
+package com.sangupta.amass.core;
+
+import com.sangupta.amass.domain.CrawlableURL;
 
 /**
  * Contract for implementations that need to check the {@link CrawlableURL} before

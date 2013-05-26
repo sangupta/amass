@@ -19,9 +19,8 @@
  * 
  */
 
-package com.sangupta.amass.impl;
+package com.sangupta.amass.domain;
 
-import com.sangupta.amass.CrawlableURL;
 
 /**
  * 

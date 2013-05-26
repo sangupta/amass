@@ -19,7 +19,7 @@
  * 
  */
 
-package com.sangupta.amass;
+package com.sangupta.amass.domain;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

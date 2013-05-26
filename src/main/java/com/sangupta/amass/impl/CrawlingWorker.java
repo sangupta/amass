@@ -19,11 +19,15 @@
  * 
  */
 
-package com.sangupta.amass;
+package com.sangupta.amass.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sangupta.amass.core.AfterCrawlHandler;
+import com.sangupta.amass.core.BeforeCrawlHandler;
+import com.sangupta.amass.domain.AmassSignal;
+import com.sangupta.amass.domain.CrawlJob;
 import com.sangupta.jerry.http.WebInvoker;
 import com.sangupta.jerry.http.WebResponse;
 

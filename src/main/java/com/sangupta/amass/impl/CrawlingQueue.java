@@ -19,13 +19,18 @@
  * 
  */
 
-package com.sangupta.amass;
+package com.sangupta.amass.impl;
 
 import java.util.Enumeration;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import com.sangupta.amass.impl.DefaultCrawlableURL;
+import com.sangupta.amass.core.QueueMessageConverter;
+import com.sangupta.amass.domain.AmassSignal;
+import com.sangupta.amass.domain.CrawlJob;
+import com.sangupta.amass.domain.CrawlableURL;
+import com.sangupta.amass.domain.DefaultCrawlableURL;
 
 /**
  * A priority based queue, that collects all URLs that need to be crawled.
@@ -38,6 +43,12 @@ import com.sangupta.amass.impl.DefaultCrawlableURL;
  *
  */
 public class CrawlingQueue {
+	
+	/**
+	 * The default priority of any item when this is added to the
+	 * internal queue.
+	 */
+	private static final int DEFAULT_PRIORITY = 1;
 
 	/**
 	 * The map that maps the URL to a crawling job so that the same URL does
@@ -49,7 +60,18 @@ public class CrawlingQueue {
 	 * The embeddded priority queue that serves worker threads.
 	 * 
 	 */
-	private final PriorityBlockingQueue<CrawlJob> jobQueue;
+	private final BlockingQueue<CrawlJob> internalQueue;
+	
+	/**
+	 * A blocking queue that is provided from outside.
+	 */
+	private final BlockingQueue<Object> externalQueue;
+	
+	/**
+	 * Converter to use to read from the {@link #externalQueue}.
+	 */
+	@SuppressWarnings("rawtypes")
+	private final QueueMessageConverter queueMessageConverter;
 	
 	/**
 	 * The signal object that let's workers and everyone know if
@@ -65,14 +87,33 @@ public class CrawlingQueue {
 	private volatile boolean closureSeeked;
 	
 	/**
-	 * Constructor.
+	 * Constructor that creates an object of the crawling queue.
 	 * 
+	 * @param externalQueue
 	 * @param amassSignal
 	 */
-	public CrawlingQueue(AmassSignal amassSignal) {
-		this.jobs = new ConcurrentHashMap<String, CrawlJob>();
-		this.jobQueue = new PriorityBlockingQueue<CrawlJob>();
+	public CrawlingQueue(BlockingQueue<Object> externalQueue, QueueMessageConverter<? extends Object> queueMessageConverter, AmassSignal amassSignal) {
 		this.amassSignal = amassSignal;
+		
+		if(externalQueue != null) {
+			if(queueMessageConverter == null) {
+				throw new IllegalArgumentException("QueueMessageConverter cannot be null when specifying an external queue.");
+			}
+
+			this.jobs = null;
+			this.externalQueue = externalQueue;
+			this.queueMessageConverter = queueMessageConverter;
+			this.internalQueue = null;
+		} else {
+			if(queueMessageConverter == null) {
+				throw new IllegalArgumentException("QueueMessageConverter must be null when using an internal queue.");
+			}
+			
+			this.jobs = new ConcurrentHashMap<String, CrawlJob>();
+			this.internalQueue = new PriorityBlockingQueue<CrawlJob>();
+			this.externalQueue = null;
+			this.queueMessageConverter = null;
+		}
 	}
 	
 	/**
@@ -81,7 +122,7 @@ public class CrawlingQueue {
 	 * @return
 	 */
 	public boolean submitURL(String url) {
-		return this.submitURL(url, 1);
+		return this.submitURL(url, DEFAULT_PRIORITY);
 	}
 
 	/**
@@ -104,7 +145,7 @@ public class CrawlingQueue {
 	 * @return
 	 */
 	public boolean submitURL(CrawlableURL crawlableURL) {
-		return this.submitURL(crawlableURL, 1);
+		return this.submitURL(crawlableURL, DEFAULT_PRIORITY);
 	}
 	
 	/**
@@ -113,6 +154,10 @@ public class CrawlingQueue {
 	 * @return
 	 */
 	public boolean submitURL(final CrawlableURL crawlableURL, final int priority) {
+		if(this.internalQueue == null) {
+			throw new IllegalArgumentException("Jobs can only be submitted to internal queue implementations.");
+		}
+		
 		if(crawlableURL == null) {
 			return false;
 		}
@@ -126,7 +171,7 @@ public class CrawlingQueue {
 		if(previous == null) {
 			// no previous jobs
 			// submit this one up
-			this.jobQueue.offer(job);
+			this.internalQueue.offer(job);
 		} else {
 			// there seems to be a job previously submitted
 			// let's increase its priority
@@ -147,11 +192,38 @@ public class CrawlingQueue {
 	public CrawlJob take() {
 		CrawlJob job = null;
 		do {
-			job = this.jobQueue.poll();
+			if(isInternalQueueBacked()) {
+				// read from the internal queue if we are using one
+				job = this.internalQueue.poll();
+
+			} else {
 			
+				// else read from the external queue
+				try {
+					Object message = this.externalQueue.take();
+					if(message != null) {
+						// convert this message
+						@SuppressWarnings("unchecked")
+						CrawlableURL crawlableURL = this.queueMessageConverter.convert(message);
+						
+						// if the obtained URL is not null, return back
+						// us a crawling job
+						if(crawlableURL != null) {
+							job = new CrawlJob(crawlableURL);
+						}
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			// see if we are stopping by
 			if(this.amassSignal.isStopping()) {
 				return null;
 			}
+			
+			// any null attributes indicate that there is nothing
+			// in the queue and we might need to wait more.
 			
 			if(job != null) {
 				break;
@@ -170,27 +242,50 @@ public class CrawlingQueue {
 		} while(true);
 
 		// remove from the jobs map
-		this.jobs.remove(job.getCrawlableURL().getURL());
+		if(this.jobs != null) {
+			this.jobs.remove(job.getCrawlableURL().getURL());
+		}
+		
 		return job;
 	}
 
 	/**
-	 * Output the debug information on all jobs.
+	 * Output the debug information on all jobs. This works only for all internal
+	 * jobs.
 	 * 
 	 */
-	void debugJobInfo() {
+	public void debugJobInfo() {
+		if(!isInternalQueueBacked()) {
+			return;
+		}
+		
 		for (Enumeration<CrawlJob> myJobs = this.jobs.elements(); myJobs.hasMoreElements(); ) {
 			CrawlJob myJob = myJobs.nextElement();
 			System.out.println("URL " + myJob.getCrawlableURL().getURL() + " with priority of " + myJob.getPriority().get());
 		}
 	}
+	
+	/**
+	 * Specifies if we are running using an internal queue
+	 * backed implementation.
+	 * 
+	 * @return
+	 */
+	public boolean isInternalQueueBacked() {
+		return this.internalQueue != null;
+	}
 
 	/**
-	 * Clear all pending jobs and close it out.
+	 * Clear all pending internal jobs and close it out. We do
+	 * not clean up any external queue that is provided, and it's
+	 * responsibility lies with the using application.
 	 * 
 	 */
-	void clearAllJobs() {
-		this.jobQueue.clear();
+	public void clearAllJobs() {
+		if(isInternalQueueBacked()) {
+			this.internalQueue.clear();
+		}
+		
 		this.jobs.clear();
 	}
 
@@ -200,9 +295,19 @@ public class CrawlingQueue {
 	 * 
 	 */
 	public void waitForClosure() {
+		// we need not wait for any external queue to close
+		// and thus we can shutdown immediately when using such
+		// a queue.
+		if(!isInternalQueueBacked()) {
+			this.closureSeeked = true;
+			return;
+		}
+		
+		// we are using an internal queue, we must wait
+		// till it gets cleared up
 		CrawlJob job = null;
 		do {
-			job = this.jobQueue.peek();
+			job = this.internalQueue.peek();
 			if(job == null) {
 				break;
 			}

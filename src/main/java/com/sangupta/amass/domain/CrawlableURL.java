@@ -19,7 +19,7 @@
  * 
  */
 
-package com.sangupta.amass;
+package com.sangupta.amass.domain;
 
 /**
  * A contract for any object that intends be crawled by {@link Amass} and

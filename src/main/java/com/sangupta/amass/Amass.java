@@ -21,7 +21,16 @@
 
 package com.sangupta.amass;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.sangupta.amass.core.AfterCrawlHandler;
+import com.sangupta.amass.core.BeforeCrawlHandler;
+import com.sangupta.amass.core.QueueMessageConverter;
+import com.sangupta.amass.domain.AmassSignal;
+import com.sangupta.amass.domain.CrawlableURL;
+import com.sangupta.amass.impl.CrawlingQueue;
+import com.sangupta.amass.impl.CrawlingWorker;
 
 
 /**
@@ -105,6 +114,20 @@ public class Amass {
 	 * @param numThreads
 	 */
 	public Amass(final int numThreads, final BeforeCrawlHandler beforeCrawlHandler, final AfterCrawlHandler afterCrawlHandler) {
+		this(numThreads, null, null, beforeCrawlHandler, afterCrawlHandler);
+	}
+	
+	/**
+	 * Create a new instance of {@link Amass} that uses the given number of threads
+	 * for crawling purposes and the given backing {@link BlockingQueue} to read
+	 * crawling jobs from.
+	 * 
+	 * @param numThreads
+	 * @param backingQueue
+	 * @param beforeCrawlHandler
+	 * @param afterCrawlHandler
+	 */
+	public Amass(final int numThreads, final BlockingQueue<Object> backingQueue, final QueueMessageConverter<? extends Object> queueMessageConverter, final BeforeCrawlHandler beforeCrawlHandler, final AfterCrawlHandler afterCrawlHandler) {
 		if(numThreads <= 0) {
 			throw new IllegalArgumentException("Number of threads cannot be less than one.");
 		}
@@ -118,7 +141,7 @@ public class Amass {
 		this.afterCrawlHandler = afterCrawlHandler;
 		
 		this.amassSignal = new AmassSignal();
-		this.crawlingQueue = new CrawlingQueue(this.amassSignal);
+		this.crawlingQueue = new CrawlingQueue(backingQueue, queueMessageConverter, this.amassSignal);
 		
 		this.workerGroup = new ThreadGroup("Amass-Workers-" + AMASS_INSTANCE_COUNT.getAndIncrement());
 		this.workers = new CrawlingWorker[this.numThreads];

@@ -19,7 +19,7 @@
  * 
  */
 
-package com.sangupta.amass;
+package com.sangupta.amass.domain;
 
 /**
  * Class that signifies the state in which {@link Amass} is.
