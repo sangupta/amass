@@ -1,7 +1,7 @@
 /**
  *
  * amass - web crawling made easy
- * Copyright (c) 2011, Sandeep Gupta
+ * Copyright (c) 2011-2013, Sandeep Gupta
  * 
  * http://www.sangupta/projects/amass
  * 
@@ -105,7 +105,7 @@ public class CrawlingQueue {
 			this.queueMessageConverter = queueMessageConverter;
 			this.internalQueue = null;
 		} else {
-			if(queueMessageConverter == null) {
+			if(queueMessageConverter != null) {
 				throw new IllegalArgumentException("QueueMessageConverter must be null when using an internal queue.");
 			}
 			

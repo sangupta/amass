@@ -1,7 +1,7 @@
 /**
  *
  * amass - web crawling made easy
- * Copyright (c) 2011, Sandeep Gupta
+ * Copyright (c) 2011-2013, Sandeep Gupta
  * 
  * http://www.sangupta/projects/amass
  * 
