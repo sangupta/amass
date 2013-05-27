@@ -62,12 +62,12 @@ public interface AfterCrawlHandler {
 	 * @param priority
 	 *            the priority with which the URL was crawled.
 	 * 
-	 * @param t
+	 * @param throwable
 	 *            the exception that was thrown during the process
 	 * 
 	 * @param timeConsumed
 	 *            the time consumed in milli-seconds to crawl
 	 */
-	public void crawlError(CrawlableURL crawlableURL, int priority, Throwable t, long timeConsumed);
+	public void crawlError(CrawlableURL crawlableURL, int priority, Throwable throwable, long timeConsumed);
 
 }
