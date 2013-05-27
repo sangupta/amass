@@ -142,13 +142,7 @@ public class CrawlingWorker implements Runnable {
 				response = WebInvoker.getResponse(job.getCrawlableURL().getURL());
 				final long end = System.currentTimeMillis();
 				
-				timeConsumed = System.currentTimeMillis() - start;
-				
-				// check for stop/pause
-				if(this.amassSignal.isStopping()) {
-					break;
-				}
-				pauseIfNeeded();
+				timeConsumed = end - start;
 				
 				try {
 					this.afterCrawlHandler.afterCrawl(job.getCrawlableURL(), job.getPriority().get(), response, timeConsumed);
