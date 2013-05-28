@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import com.sangupta.amass.core.AfterCrawlHandler;
 import com.sangupta.amass.core.BeforeCrawlHandler;
+import com.sangupta.amass.core.CrawlHandler;
 import com.sangupta.amass.domain.AmassSignal;
 import com.sangupta.amass.domain.CrawlJob;
-import com.sangupta.jerry.http.WebInvoker;
 import com.sangupta.jerry.http.WebResponse;
 
 /**
@@ -47,6 +47,8 @@ public class CrawlingWorker implements Runnable {
 	
 	private final BeforeCrawlHandler beforeCrawlHandler;
 	
+	private final CrawlHandler crawlHandler;
+	
 	private final AfterCrawlHandler afterCrawlHandler;
 	
 	private final AmassSignal amassSignal;
@@ -59,10 +61,18 @@ public class CrawlingWorker implements Runnable {
 	 */
 	private volatile boolean closureSeeked;
 	
-	public CrawlingWorker(CrawlingQueue crawlingQueue, BeforeCrawlHandler beforeCrawlHandler, AfterCrawlHandler afterCrawlHandler, AmassSignal amassSignal) {
+	public CrawlingWorker(CrawlingQueue crawlingQueue, BeforeCrawlHandler beforeCrawlHandler, CrawlHandler crawlHandler, AfterCrawlHandler afterCrawlHandler, AmassSignal amassSignal) {
 		this.crawlingQueue = crawlingQueue;
+		
 		this.beforeCrawlHandler = beforeCrawlHandler;
+		if(crawlHandler == null) {
+			this.crawlHandler = new DefaultCrawlHandler();
+		} else {
+			this.crawlHandler = crawlHandler;
+		}
+		
 		this.afterCrawlHandler = afterCrawlHandler;
+		
 		this.amassSignal = amassSignal;
 	}
 
@@ -134,29 +144,31 @@ public class CrawlingWorker implements Runnable {
 			
 			LOGGER.debug("Crawling URL: " + job.getCrawlableURL().getURL() + "... ");
 			
-			WebResponse response = null;
-			long timeConsumed = 0;
-			final long start = System.currentTimeMillis();
+			long start = System.currentTimeMillis();
+			long end = 0;
+			Throwable throwable = null;
+			WebResponse webResponse= null;
 			try {
-				
-				response = WebInvoker.getResponse(job.getCrawlableURL().getURL());
-				final long end = System.currentTimeMillis();
-				
-				timeConsumed = end - start;
-				
+				webResponse = this.crawlHandler.crawl(job.getCrawlableURL());
+			} catch(Throwable t) {
+				throwable = t;
+				LOGGER.error("Unable to execute crawl handler on url {}", job, throwable);
+			} finally {
+				end = System.currentTimeMillis();
+			}
+			final long timeConsumed = end - start;
+
+			// after crawl handler
+			if(throwable != null) {
 				try {
-					this.afterCrawlHandler.afterCrawl(job.getCrawlableURL(), job.getPriority().get(), response, timeConsumed);
+					this.afterCrawlHandler.afterCrawl(job.getCrawlableURL(), job.getPriority().get(), webResponse, timeConsumed);
 				} catch(Throwable t) {
 					LOGGER.error("Unable to execute after-crawl handler on url {}", job, t);
 				}
-			} catch(Throwable t) {
-				if(timeConsumed == 0) {
-					timeConsumed = System.currentTimeMillis() - start;
-				}
-				
+			} else {
 				// in case we get an error we must stop crawling now.
 				try {
-					this.afterCrawlHandler.crawlError(job.getCrawlableURL(), job.getPriority().get(), t, timeConsumed);
+					this.afterCrawlHandler.crawlError(job.getCrawlableURL(), job.getPriority().get(), throwable, timeConsumed);
 				} catch(Throwable t1) {
 					LOGGER.error("Unable to execute after-crawl-error handler on url {}", job, t1);
 				}

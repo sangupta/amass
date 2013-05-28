@@ -26,6 +26,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.sangupta.amass.core.AfterCrawlHandler;
 import com.sangupta.amass.core.BeforeCrawlHandler;
+import com.sangupta.amass.core.CrawlHandler;
+import com.sangupta.amass.core.CrawlingHandler;
 import com.sangupta.amass.core.QueueMessageConverter;
 import com.sangupta.amass.domain.AmassSignal;
 import com.sangupta.amass.domain.CrawlableURL;
@@ -74,6 +76,12 @@ public class Amass {
 	private final AfterCrawlHandler afterCrawlHandler;
 	
 	/**
+	 * The handler that needs to be executed for crawling each URL.
+	 * 
+	 */
+	private final CrawlHandler crawlHandler;
+	
+	/**
 	 * The job queue that is used by this {@link Amass} instance.
 	 */
 	private final CrawlingQueue crawlingQueue;
@@ -107,6 +115,10 @@ public class Amass {
 	 */
 	private volatile boolean closed = false;
 	
+	public Amass(int numThreads, AfterCrawlHandler afterCrawlHandler) {
+		this(numThreads, null, null, null, null, afterCrawlHandler);
+	}
+	
 	/**
 	 * Create a new instance of {@link Amass} that uses the given
 	 * number of threads for crawling purposes.
@@ -114,7 +126,15 @@ public class Amass {
 	 * @param numThreads
 	 */
 	public Amass(final int numThreads, final BeforeCrawlHandler beforeCrawlHandler, final AfterCrawlHandler afterCrawlHandler) {
-		this(numThreads, null, null, beforeCrawlHandler, afterCrawlHandler);
+		this(numThreads, null, null, beforeCrawlHandler, null, afterCrawlHandler);
+	}
+	
+	public Amass(int numThreads, CrawlingHandler crawlingHandler) {
+		this(numThreads, null, null, crawlingHandler, crawlingHandler, crawlingHandler);
+	}
+	
+	public Amass(int numThreads, BlockingQueue<Object> backingQueue, QueueMessageConverter<? extends Object> queueMessageConverter, CrawlingHandler crawlingHandler) {
+		this(numThreads, backingQueue, queueMessageConverter, crawlingHandler, crawlingHandler, crawlingHandler);
 	}
 	
 	/**
@@ -127,7 +147,7 @@ public class Amass {
 	 * @param beforeCrawlHandler
 	 * @param afterCrawlHandler
 	 */
-	public Amass(final int numThreads, final BlockingQueue<Object> backingQueue, final QueueMessageConverter<? extends Object> queueMessageConverter, final BeforeCrawlHandler beforeCrawlHandler, final AfterCrawlHandler afterCrawlHandler) {
+	public Amass(final int numThreads, final BlockingQueue<Object> backingQueue, final QueueMessageConverter<? extends Object> queueMessageConverter, final BeforeCrawlHandler beforeCrawlHandler, final CrawlHandler crawlHandler, final AfterCrawlHandler afterCrawlHandler) {
 		if(numThreads <= 0) {
 			throw new IllegalArgumentException("Number of threads cannot be less than one.");
 		}
@@ -137,7 +157,9 @@ public class Amass {
 		}
 		
 		this.numThreads = numThreads;
+		
 		this.beforeCrawlHandler = beforeCrawlHandler;
+		this.crawlHandler = crawlHandler;
 		this.afterCrawlHandler = afterCrawlHandler;
 		
 		this.amassSignal = new AmassSignal();
@@ -283,7 +305,7 @@ public class Amass {
 	protected void initializeCrawlingThreads() {
 		this.amassSignal.setInitializing();
 		
-		final CrawlingWorker crawlingThread = new CrawlingWorker(this.crawlingQueue, this.beforeCrawlHandler, this.afterCrawlHandler, this.amassSignal);
+		final CrawlingWorker crawlingThread = new CrawlingWorker(this.crawlingQueue, this.beforeCrawlHandler, this.crawlHandler, this.afterCrawlHandler, this.amassSignal);
 		for(int index = 0; index < this.numThreads; index++) {
 			Thread thread = new Thread(this.workerGroup, crawlingThread, "Amass-Worker-" + index);
 			
