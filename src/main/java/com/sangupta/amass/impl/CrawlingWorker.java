@@ -104,7 +104,12 @@ public class CrawlingWorker implements Runnable {
 	 */
 	private void runCrawlingJob() {
 		do {
-			CrawlJob job = this.crawlingQueue.take();
+			CrawlJob job = null;
+			try {
+				job = this.crawlingQueue.take();
+			} catch(Throwable t) {
+				LOGGER.debug("Unable to fetch element from queue", t);
+			}
 			
 			// check for stop/pause signal
 			if(this.amassSignal.isStopping()) {
