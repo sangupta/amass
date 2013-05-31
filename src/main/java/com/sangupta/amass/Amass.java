@@ -335,7 +335,7 @@ public class Amass {
 		this.close();
 		
 		// check for closure of queue
-		this.crawlingQueue.waitForClosure();
+		this.crawlingQueue.waitForClosure(false);
 		
 		// check for closure of all crawling threads
 		waitForClosureOfCrawlingThreads(false);
@@ -355,11 +355,8 @@ public class Amass {
 		// interrupt all running worker threads
 		this.workerGroup.interrupt();
 		
-		// clear all jobs in the queue
-		this.crawlingQueue.clearAllJobs();
-		
 		// check for closure of queue
-		this.crawlingQueue.waitForClosure();
+		this.crawlingQueue.waitForClosure(true);
 		
 		// check for closure of all crawling threads
 		waitForClosureOfCrawlingThreads(true);

@@ -281,12 +281,14 @@ public class CrawlingQueue {
 	 * responsibility lies with the using application.
 	 * 
 	 */
-	public void clearAllJobs() {
+	private void clearAllJobs() {
 		if(isInternalQueueBacked()) {
 			this.internalQueue.clear();
 		}
 		
-		this.jobs.clear();
+		if(this.jobs != null) {
+			this.jobs.clear();
+		}
 	}
 
 	/**
@@ -294,7 +296,11 @@ public class CrawlingQueue {
 	 * till all jobs have been read from this queue.
 	 * 
 	 */
-	public void waitForClosure() {
+	public void waitForClosure(boolean clearJobs) {
+		if(clearJobs) {
+			clearAllJobs();
+		}
+		
 		// we need not wait for any external queue to close
 		// and thus we can shutdown immediately when using such
 		// a queue.

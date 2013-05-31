@@ -164,7 +164,7 @@ public class CrawlingWorker implements Runnable {
 			final long timeConsumed = end - start;
 
 			// after crawl handler
-			if(throwable != null) {
+			if(throwable == null) {
 				try {
 					this.afterCrawlHandler.afterCrawl(job.getCrawlableURL(), job.getPriority().get(), webResponse, timeConsumed);
 				} catch(Throwable t) {
