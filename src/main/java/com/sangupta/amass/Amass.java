@@ -33,6 +33,7 @@ import com.sangupta.amass.domain.AmassSignal;
 import com.sangupta.amass.domain.CrawlableURL;
 import com.sangupta.amass.impl.CrawlingQueue;
 import com.sangupta.amass.impl.CrawlingWorker;
+import com.sangupta.jerry.util.DateUtils;
 
 
 /**
@@ -339,6 +340,28 @@ public class Amass {
 		
 		// check for closure of all crawling threads
 		waitForClosureOfCrawlingThreads(false);
+	}
+	
+	/**
+	 * This method waits till the point when no more
+	 * crawling jobs are available in the queue of this
+	 * {@link Amass} instance. This thread may block if
+	 * jobs are incoming.
+	 */
+	public void waitForCompletion() {
+		do {
+			if(!this.crawlingQueue.hasJob()) {
+				break;
+			}
+			
+			// has job
+			// sleep for a second
+			try {
+				Thread.sleep(DateUtils.ONE_SECOND);
+			} catch (InterruptedException e) {
+				// eat up
+			}
+		} while(true);
 	}
 	
 	/**

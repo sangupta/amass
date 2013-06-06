@@ -329,4 +329,15 @@ public class CrawlingQueue {
 		this.closureSeeked = true;
 	}
 
+	/**
+	 * @return
+	 */
+	public boolean hasJob() {
+		if(this.internalQueue != null) {
+			return !this.internalQueue.isEmpty();
+		}
+		
+		return !this.externalQueue.isEmpty();
+	}
+
 }
