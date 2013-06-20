@@ -10,7 +10,7 @@
 
 	<groupId>com.sangupta</groupId>
 	<artifactId>amass</artifactId>
-	<version>0.1.2</version>
+	<version>0.1.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>amass</name>
