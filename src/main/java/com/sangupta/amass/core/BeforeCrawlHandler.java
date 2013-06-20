@@ -33,15 +33,22 @@ import com.sangupta.amass.domain.CrawlableURL;
 public interface BeforeCrawlHandler {
 	
 	/**
-	 * Method that is invoked before crawling for a URL is to begin. This hook can
-	 * be used by implementations to figure out one last time, if they wish to cancel
-	 * the crawling of the URL.
+	 * Method that is invoked before crawling for a URL is to begin. This hook
+	 * can be used by implementations to figure out one last time, if they wish
+	 * to cancel the crawling of the URL.
 	 * 
-	 * The method should return <code>true</code> to continue crawling the URL, or 
-	 * <code>false</code> to cancel the crawling.
+	 * The method should return <code>true</code> to continue crawling the URL,
+	 * or <code>false</code> to cancel the crawling.
 	 * 
 	 * @param crawlableURL
-	 * @return
+	 *            the URL which we will be crawling after this handler
+	 * 
+	 * @param priority
+	 *            the priority of the URL as received
+	 * 
+	 * @return <code>true</code> if we can go ahead to crawl the URL,
+	 *         <code>false</code> in case we need to skip crawling this URL.
+	 * 
 	 */
 	public boolean beforeCrawl(CrawlableURL crawlableURL, int priority);
 

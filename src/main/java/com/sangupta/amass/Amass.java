@@ -289,11 +289,12 @@ public class Amass {
 	
 	/**
 	 * Indicates if this {@link Amass} instance has pending work left or not.
-	 *  
-	 * @return
+	 * 
+	 * @return <code>true</code> if we still have work left to work upon,
+	 *         <code>false</code> otherwise
 	 */
 	public boolean hasPendingWork() {
-		return false;
+		return this.crawlingQueue.hasJob();
 	}
 
 	// Internal methods follow

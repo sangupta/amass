@@ -117,19 +117,29 @@ public class CrawlingQueue {
 	}
 	
 	/**
+	 * Submit the given URL to the crawling queue with default priority.
 	 * 
 	 * @param url
-	 * @return
+	 *            the URL that needs to be added to crawling queue
+	 * 
+	 * @return <code>true</code> if the URL was added to the queue,
+	 *         <code>false</code> otherwise
 	 */
 	public boolean submitURL(String url) {
 		return this.submitURL(url, DEFAULT_PRIORITY);
 	}
 
 	/**
+	 * Submit the given URL to the crawling queue with the given priority.
 	 * 
 	 * @param url
+	 *            the URL that needs to be added to crawling queue
+	 * 
 	 * @param priority
-	 * @return
+	 *            the priority which needs to used for adding
+	 * 
+	 * @return <code>true</code> if the URL was added to the queue,
+	 *         <code>false</code> otherwise
 	 */
 	public boolean submitURL(final String url, final int priority) {
 		if(url == null) {
@@ -140,18 +150,31 @@ public class CrawlingQueue {
 	}
 	
 	/**
+	 * Submit the given instance of {@link CrawlableURL} object with default
+	 * priority to the crawling queue
 	 * 
 	 * @param crawlableURL
-	 * @return
+	 *            the object that needs to be added
+	 * 
+	 * @return <code>true</code> if the URL was added to the queue,
+	 *         <code>false</code> otherwise
 	 */
 	public boolean submitURL(CrawlableURL crawlableURL) {
 		return this.submitURL(crawlableURL, DEFAULT_PRIORITY);
 	}
 	
 	/**
+	 * Submit the given instance of {@link CrawlableURL} object with the given
+	 * priority to the crawling queue
 	 * 
 	 * @param crawlableURL
-	 * @return
+	 *            the object that needs to be added
+	 * 
+	 * @param priority
+	 *            the priority with which to add the instance
+	 * 
+	 * @return <code>true</code> if the URL was added to the queue,
+	 *         <code>false</code> otherwise
 	 */
 	public boolean submitURL(final CrawlableURL crawlableURL, final int priority) {
 		if(this.internalQueue == null) {
@@ -182,12 +205,13 @@ public class CrawlingQueue {
 	}
 	
 	/**
-	 * Get a crawling job out of this {@link CrawlingQueue}. If no element
-	 * is available in this queue, this method will wait till one is available.
+	 * Get a crawling job out of this {@link CrawlingQueue}. If no element is
+	 * available in this queue, this method will wait till one is available.
 	 * 
 	 * If this queue is shutting down, it will return a <code>null</code>.
 	 * 
-	 * @return
+	 * @return an instance of the {@link CrawlJob} once it is available in the
+	 *         queue
 	 */
 	public CrawlJob take() {
 		CrawlJob job = null;
@@ -252,7 +276,7 @@ public class CrawlingQueue {
 	/**
 	 * Output the debug information on all jobs. This works only for all internal
 	 * jobs.
-	 * 
+	 *
 	 */
 	public void debugJobInfo() {
 		if(!isInternalQueueBacked()) {
@@ -266,10 +290,12 @@ public class CrawlingQueue {
 	}
 	
 	/**
-	 * Specifies if we are running using an internal queue
-	 * backed implementation.
+	 * Specifies if we are running using an internal queue backed
+	 * implementation.
 	 * 
-	 * @return
+	 * @return <code>true</code> if we are running over an internal queue,
+	 *         <code>false</code if we are running over an external queue
+	 *         supplied by the calling code
 	 */
 	public boolean isInternalQueueBacked() {
 		return this.internalQueue != null;
@@ -330,7 +356,11 @@ public class CrawlingQueue {
 	}
 
 	/**
-	 * @return
+	 * Check if we have a job available in the actual queue over which this
+	 * {@link CrawlingQueue} instance is based.
+	 * 
+	 * @return <code>true</code> if the queue has elements, <code>false</code>
+	 *         otherwise
 	 */
 	public boolean hasJob() {
 		if(this.internalQueue != null) {

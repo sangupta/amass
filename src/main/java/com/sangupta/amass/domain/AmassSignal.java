@@ -21,6 +21,8 @@
 
 package com.sangupta.amass.domain;
 
+import com.sangupta.amass.Amass;
+
 /**
  * Class that signifies the state in which {@link Amass} is.
  * 
@@ -45,7 +47,8 @@ public class AmassSignal {
 	/**
 	 * Return the current mode of this signal object.
 	 * 
-	 * @return
+	 * @return the current mode that this signal represents
+	 * 
 	 */
 	public SignalMode getMode() {
 		return this.mode;
@@ -115,16 +118,20 @@ public class AmassSignal {
 	}
 	
 	/**
+	 * Check if this signal represents an initializing mode.
 	 * 
-	 * @return
+	 * @return <code>true</code> if this signal is set to
+	 *         {@link SignalMode#Initializing}, <code>false</code> otherwise
 	 */
 	public boolean isInitializing() {
 		return this.mode == SignalMode.Initializing;
 	}
 	
 	/**
+	 * Check if this signal represents a completely initialized state.
 	 * 
-	 * @return
+	 * @return <code>true</code> if this signal has completed initialization,
+	 *         <code>false</code> otherwise
 	 */
 	public boolean isInitialized() {
 		switch(this.mode) {

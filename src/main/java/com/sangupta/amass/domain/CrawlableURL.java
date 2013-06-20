@@ -21,6 +21,8 @@
 
 package com.sangupta.amass.domain;
 
+import com.sangupta.amass.Amass;
+
 /**
  * A contract for any object that intends be crawled by {@link Amass} and
  * needs to keep extra data along side.
@@ -33,7 +35,8 @@ public interface CrawlableURL {
 	/**
 	 * Return the URL associated with this crawling job.
 	 * 
-	 * @return
+	 * @return the actual {@link String} that represents this URL.
+	 * 
 	 */
 	public String getURL();
 

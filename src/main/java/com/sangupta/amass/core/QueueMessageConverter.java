@@ -21,6 +21,7 @@
 
 package com.sangupta.amass.core;
 
+import com.sangupta.amass.Amass;
 import com.sangupta.amass.domain.CrawlJob;
 import com.sangupta.amass.domain.CrawlableURL;
 
@@ -35,12 +36,17 @@ import com.sangupta.amass.domain.CrawlableURL;
 public interface QueueMessageConverter<T> {
 
 	/**
-	 * Convert the message that arrived from the external queue
-	 * to the standard {@link CrawlableURL} instance that the
-	 * workers can use.
+	 * Convert the message that arrived from the external queue to the standard
+	 * {@link CrawlableURL} instance that the workers can use.
 	 * 
 	 * @param object
-	 * @return
+	 *            the object received from the queue that needs to be converted
+	 *            into a {@link CrawlableURL} instance which the {@link Amass}
+	 *            project understands.
+	 * 
+	 * @return the {@link CrawlableURL} instance built using the object form the
+	 *         queue.
+	 * 
 	 */
 	public CrawlableURL convert(T object);
 	
