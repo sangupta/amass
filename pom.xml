@@ -57,7 +57,7 @@
 		<dependency>
 			<groupId>com.sangupta</groupId>
 			<artifactId>jerry</artifactId>
-			<version>0.3.3-SNAPSHOT</version>
+			<version>0.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
