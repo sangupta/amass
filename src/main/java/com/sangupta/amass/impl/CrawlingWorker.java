@@ -56,6 +56,11 @@ public class CrawlingWorker implements Runnable {
 	private volatile boolean working = false;
 	
 	/**
+	 * Time when a URL was successfully processed (web-response was received)  
+	 */
+	private volatile long lastCrawlTime;
+	
+	/**
 	 * Indicates if a closure of this thread has been seeked.
 	 * 
 	 */
@@ -150,7 +155,6 @@ public class CrawlingWorker implements Runnable {
 			LOGGER.debug("Crawling URL: " + job.getCrawlableURL().getURL() + "... ");
 			
 			long start = System.currentTimeMillis();
-			long end = 0;
 			Throwable throwable = null;
 			WebResponse webResponse= null;
 			try {
@@ -159,9 +163,9 @@ public class CrawlingWorker implements Runnable {
 				throwable = t;
 				LOGGER.error("Unable to execute crawl handler on url {}", job, throwable);
 			} finally {
-				end = System.currentTimeMillis();
+				this.lastCrawlTime = System.currentTimeMillis();
 			}
-			final long timeConsumed = end - start;
+			final long timeConsumed = this.lastCrawlTime - start;
 
 			// after crawl handler
 			if(throwable == null) {
@@ -205,6 +209,13 @@ public class CrawlingWorker implements Runnable {
 				// eat up
 			}
 		} while(true);
+	}
+
+	/**
+	 * @return the lastCrawlTime
+	 */
+	public long getLastCrawlTime() {
+		return lastCrawlTime;
 	}
 
 }

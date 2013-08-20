@@ -450,4 +450,11 @@ public class Amass {
 		return this.afterCrawlHandler;
 	}
 
+	CrawlingWorker[] getCrawlingWorkers() {
+		return this.workers;
+	}
+	
+	Thread[] getWorkerThreads() {
+		 return this.workerThreads;
+	}
 }
