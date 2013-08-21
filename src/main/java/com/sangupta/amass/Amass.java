@@ -307,8 +307,8 @@ public class Amass {
 	protected void initializeCrawlingThreads() {
 		this.amassSignal.setInitializing();
 		
-		final CrawlingWorker crawlingThread = new CrawlingWorker(this.crawlingQueue, this.beforeCrawlHandler, this.crawlHandler, this.afterCrawlHandler, this.amassSignal);
 		for(int index = 0; index < this.numThreads; index++) {
+			CrawlingWorker crawlingThread = new CrawlingWorker(this.crawlingQueue, this.beforeCrawlHandler, this.crawlHandler, this.afterCrawlHandler, this.amassSignal);
 			Thread thread = new Thread(this.workerGroup, crawlingThread, "Amass-Worker-" + index);
 			
 			this.workers[index] = crawlingThread;

@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sangupta.amass.impl.CrawlingWorker;
 import com.sangupta.jerry.util.DateUtils;
+import com.sangupta.jerry.util.StringUtils;
 
 /**
  * @author sangupta
@@ -84,23 +85,28 @@ public class AmassDeadlockDetector extends TimerTask {
 		// also dump a stats of time from all amass threads as to when they were last processed.
 		LOGGER.error("Last crawl times of all workers are as under: ");
 		long current = System.currentTimeMillis();
+		
+		StringBuilder builder = new StringBuilder(8196); // 8kb
 		for(int i = 0; i < workers.length; i++) {
-			long time = workers[i].getLastCrawlTime();
+			final long time = workers[i].getLastCrawlTime();
 			String additive = "";
 			boolean printStackTrace = false;
-			if((current - time) > DateUtils.FIVE_MINUTES) {
+			if(time > 0 && (current - time) > DateUtils.FIVE_MINUTES) {
 				additive = "[MAY-BE-BLOCKED]";
 				printStackTrace = true;
 			}
 			
-			LOGGER.error("    Worker-" + i + " " + additive + " last time when the thread crawled: " + time);
-			if(printStackTrace) {
-				Thread t = this.threads[i];
-				StackTraceElement[] elements = t.getStackTrace();
+			Thread t = this.threads[i];
+			LOGGER.error("    Worker-" + threads[i].getName() + " " + additive + " last time when the thread crawled: " + time + ", state="+ threads[i].getState());
+			if(printStackTrace || time == 0) {
 				LOGGER.error("Thread stack trace for " + t.getName() + "; id=" + t.getId());
+				
+				StackTraceElement[] elements = t.getStackTrace();
 				for(StackTraceElement element : elements) {
-					LOGGER.error("        " + element.toString());
+					builder.append("        " + element.toString() + StringUtils.SYSTEM_NEW_LINE);
 				}
+				LOGGER.error("Stack trace: \n" + builder.toString());
+				builder.setLength(0);
 			}
 		}
 	}

@@ -164,6 +164,7 @@ public class CrawlingWorker implements Runnable {
 				LOGGER.error("Unable to execute crawl handler on url {}", job, throwable);
 			} finally {
 				this.lastCrawlTime = System.currentTimeMillis();
+				LOGGER.debug("Thread " + Thread.currentThread().getName() + " last crawl time: " + this.lastCrawlTime);
 			}
 			final long timeConsumed = this.lastCrawlTime - start;
 
