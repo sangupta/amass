@@ -118,12 +118,14 @@ public class CrawlingWorker implements Runnable {
 			
 			// check for stop/pause signal
 			if(this.amassSignal.isStopping()) {
+				LOGGER.debug("skipping message as we are stopping: {}", job);
 				break;
 			}
 			
 			pauseIfNeeded();
 			
 			if(job == null) {
+				LOGGER.debug("null job fetched from server");
 				if(this.closureSeeked) {
 					return;
 				}

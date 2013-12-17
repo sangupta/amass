@@ -26,6 +26,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sangupta.amass.core.QueueMessageConverter;
 import com.sangupta.amass.domain.AmassSignal;
 import com.sangupta.amass.domain.CrawlJob;
@@ -43,6 +46,8 @@ import com.sangupta.amass.domain.DefaultCrawlableURL;
  *
  */
 public class CrawlingQueue {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CrawlingQueue.class);
 	
 	/**
 	 * The default priority of any item when this is added to the
@@ -213,6 +218,7 @@ public class CrawlingQueue {
 	 * @return an instance of the {@link CrawlJob} once it is available in the
 	 *         queue
 	 */
+	@SuppressWarnings("unchecked")
 	public CrawlJob take() {
 		CrawlJob job = null;
 		do {
@@ -225,24 +231,33 @@ public class CrawlingQueue {
 				// else read from the external queue
 				try {
 					Object message = this.externalQueue.take();
+					LOGGER.debug("Message received from external queue: {}", message);
 					if(message != null) {
-						// convert this message
-						@SuppressWarnings("unchecked")
-						CrawlableURL crawlableURL = this.queueMessageConverter.convert(message);
+						CrawlableURL crawlableURL = null;
+
+						// convert the message
+						try {
+							crawlableURL = this.queueMessageConverter.convert(message);
+						} catch(Exception e) {
+							LOGGER.error("Unable to convert message to crawlable url: " + message, e);
+						}
 						
 						// if the obtained URL is not null, return back
 						// us a crawling job
 						if(crawlableURL != null) {
 							job = new CrawlJob(crawlableURL);
+						} else {
+							LOGGER.error("NULL translated as message over the queue: {}", message);
 						}
 					}
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					LOGGER.error("Interrupted while waiting to read message", e);
 				}
 			}
 			
 			// see if we are stopping by
 			if(this.amassSignal.isStopping()) {
+				LOGGER.debug("Skipping message because stopping signal sent: {}", job);
 				return null;
 			}
 			
@@ -254,6 +269,7 @@ public class CrawlingQueue {
 			}
 			
 			if(this.closureSeeked) {
+				LOGGER.debug("Skipping message because closure seeked: {}", job);
 				return null;
 			}
 			
