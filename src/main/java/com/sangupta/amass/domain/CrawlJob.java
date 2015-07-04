@@ -61,6 +61,7 @@ public class CrawlJob implements Comparable<CrawlJob> {
 	 * Construct a new crawling job with default priority of one.
 	 * 
 	 * @param crawlableURL
+	 *            the URL that needs to be crawled
 	 */
 	public CrawlJob(CrawlableURL crawlableURL) {
 		this(crawlableURL, 1);
@@ -70,7 +71,10 @@ public class CrawlJob implements Comparable<CrawlJob> {
 	 * Construct a new crawling job with the given priority.
 	 * 
 	 * @param crawlableURL
+	 *            the URL that needs to be crawled
+	 * 
 	 * @param priority
+	 *            the priority of crawling for this job
 	 */
 	public CrawlJob(final CrawlableURL crawlableURL, final int priority) {
 		if(crawlableURL == null) {
@@ -125,7 +129,10 @@ public class CrawlJob implements Comparable<CrawlJob> {
 	}
 	
 	/**
-	 * Increment the current priority by one.
+	 * Increment the current priority by the given value.
+	 * 
+	 * @param additive
+	 *            the value to add to current priority
 	 * 
 	 */
 	public void incrementPriority(final int additive) {

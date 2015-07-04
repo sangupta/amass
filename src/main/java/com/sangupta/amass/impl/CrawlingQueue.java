@@ -95,7 +95,15 @@ public class CrawlingQueue {
 	 * Constructor that creates an object of the crawling queue.
 	 * 
 	 * @param externalQueue
+	 *            the backing queue from which we read crawling jobs
+	 * 
+	 * @param queueMessageConverter
+	 *            the converter to read object from queue and convert it to a
+	 *            {@link CrawlableURL} object
+	 * 
 	 * @param amassSignal
+	 *            the {@link AmassSignal} object that will be sending us the
+	 *            signals
 	 */
 	public CrawlingQueue(BlockingQueue<Object> externalQueue, QueueMessageConverter<? extends Object> queueMessageConverter, AmassSignal amassSignal) {
 		this.amassSignal = amassSignal;
@@ -310,7 +318,7 @@ public class CrawlingQueue {
 	 * implementation.
 	 * 
 	 * @return <code>true</code> if we are running over an internal queue,
-	 *         <code>false</code if we are running over an external queue
+	 *         <code>false</code> if we are running over an external queue
 	 *         supplied by the calling code
 	 */
 	public boolean isInternalQueueBacked() {
@@ -334,9 +342,12 @@ public class CrawlingQueue {
 	}
 
 	/**
-	 * Wait for the closure of this queue. The closure time is the time
-	 * till all jobs have been read from this queue.
+	 * Wait for the closure of this queue. The closure time is the time till all
+	 * jobs have been read from this queue.
 	 * 
+	 * @param clearJobs
+	 *            if set to <code>true</code> all pending jobs are deleted
+	 *            before we wait for completion of currently running jobs
 	 */
 	public void waitForClosure(boolean clearJobs) {
 		if(clearJobs) {

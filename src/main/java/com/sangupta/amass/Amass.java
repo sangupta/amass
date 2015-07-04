@@ -121,10 +121,17 @@ public class Amass {
 	}
 	
 	/**
-	 * Create a new instance of {@link Amass} that uses the given
-	 * number of threads for crawling purposes.
+	 * Create a new instance of {@link Amass} that uses the given number of
+	 * threads for crawling purposes.
 	 * 
 	 * @param numThreads
+	 *            the number of threads to run in parallel
+	 * 
+	 * @param beforeCrawlHandler
+	 *            the handler to run before starting to crawl
+	 * 
+	 * @param afterCrawlHandler
+	 *            the handler to run after completing the crawl
 	 */
 	public Amass(final int numThreads, final BeforeCrawlHandler beforeCrawlHandler, final AfterCrawlHandler afterCrawlHandler) {
 		this(numThreads, null, null, beforeCrawlHandler, null, afterCrawlHandler);
@@ -139,14 +146,28 @@ public class Amass {
 	}
 	
 	/**
-	 * Create a new instance of {@link Amass} that uses the given number of threads
-	 * for crawling purposes and the given backing {@link BlockingQueue} to read
-	 * crawling jobs from.
+	 * Create a new instance of {@link Amass} that uses the given number of
+	 * threads for crawling purposes and the given backing {@link BlockingQueue}
+	 * to read crawling jobs from.
 	 * 
 	 * @param numThreads
+	 *            number of worker threads to run in parallel
+	 * 
 	 * @param backingQueue
+	 *            the backing queue from which to read jobs
+	 * 
+	 * @param queueMessageConverter
+	 *            the converter that converts the message from queue and
+	 *            converts it into a {@link CrawlableURL} object
+	 * 
 	 * @param beforeCrawlHandler
+	 *            the handler to run before starting to crawl
+	 * 
+	 * @param crawlHandler
+	 *            the handler that does the actual crawling
+	 * 
 	 * @param afterCrawlHandler
+	 *            the handler to run after completing the crawl
 	 */
 	public Amass(final int numThreads, final BlockingQueue<Object> backingQueue, final QueueMessageConverter<? extends Object> queueMessageConverter, final BeforeCrawlHandler beforeCrawlHandler, final CrawlHandler crawlHandler, final AfterCrawlHandler afterCrawlHandler) {
 		if(numThreads <= 0) {

@@ -191,6 +191,8 @@ public class CrawlingWorker implements Runnable {
 	/**
 	 * Indicates if the crawling thread is working or not.
 	 * 
+	 * @return <code>true</code> if the worker is working, <code>false</code>
+	 *         otherwise
 	 */
 	public boolean isWorking() {
 		return this.working;
