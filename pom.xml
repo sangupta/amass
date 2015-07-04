@@ -26,10 +26,11 @@
 	</licenses>
 	
 	<scm>
-		<connection>scm:git:git://github.com/sangupta/amass.git</connection>
-		<developerConnection>scm:git:http://git@github.com/sangupta/amass.git</developerConnection>
-		<url>https://github.com/sangupta/amass</url>
-	</scm>
+	    <connection>scm:git:ssh://git@github.com/sangupta/amass.git</connection>
+	    <developerConnection>scm:git:ssh://git@github.com/sangupta/amass.git</developerConnection>
+	    <url>https://github.com/sangupta/amass</url>
+	  <tag>HEAD</tag>
+  	</scm>
 	
 	<developers>
 		<developer>
